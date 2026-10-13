@@ -1,11 +1,19 @@
 // FieldCalc Lite service worker.
-// Cache-first for the four app files; bump CACHE on every release.
-var CACHE = "fieldcalc-v0.1.0";
-var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
+// Cache-first for the app shell; bump CACHE on every release.
+var CACHE = "fieldcalc-v0.1.3";
+var ASSETS = [
+  "./", "./index.html", "./privacy.html",
+  "./manifest.webmanifest", "./icon.svg",
+  "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png"
+];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); })
+    caches.open(CACHE).then(function (c) {
+      // cache:"reload" bypasses the HTTP cache, so a release never precaches a
+      // stale copy of a file that was updated behind an unexpired cache header.
+      return c.addAll(ASSETS.map(function (u) { return new Request(u, { cache: "reload" }); }));
+    })
       .then(function () { return self.skipWaiting(); })
   );
 });

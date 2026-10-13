@@ -1,0 +1,24 @@
+{
+  "name": "fieldcalc-lite",
+  "version": "0.1.0",
+  "description": "Fast field calculations for construction, MEP, and site work.",
+  "scripts": {
+    "start": "python3 -m http.server 4178 --directory dist",
+    "sync": "cap sync",
+    "assets": "capacitor-assets generate --iconBackgroundColor \"#0b1424\" --splashBackgroundColor \"#070d18\"",
+    "ios": "cap sync ios && cap open ios",
+    "android": "cap sync android && cap open android"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  },
+  "private": true
+}
