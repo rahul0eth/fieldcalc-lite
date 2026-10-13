@@ -2,6 +2,10 @@
 
 **Useful math. Zero clutter.**
 
+> **Submitting to the App Store or Google Play?** Read
+> **[SUBMIT-TO-APP-STORES.md](SUBMIT-TO-APP-STORES.md)** — it says exactly which
+> file each store wants (it is not a zip) and where to find it.
+
 A fast, installable, offline-capable web app for everyday construction, MEP, and site-work
 calculations. No accounts, no backend, no tracking, no API keys. Every value you type stays
 in your own browser.

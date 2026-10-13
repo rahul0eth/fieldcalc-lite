@@ -13,3 +13,8 @@ npm-debug.log*
 /ios/App/App/public/
 /android/app/src/main/assets/public/
 icons/
+
+# Android release signing — never commit these
+android/key.properties
+*.jks
+*.keystore
