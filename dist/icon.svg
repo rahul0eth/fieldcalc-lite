@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="FieldCalc Lite">
+  <rect width="512" height="512" rx="112" fill="#0b1424"/>
+  <rect x="8" y="8" width="496" height="496" rx="106" fill="none" stroke="#2b4567" stroke-width="12"/>
+  <path d="M118 352 L256 128 L394 352" fill="none" stroke="#ffb224" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M176 352 H336" fill="none" stroke="#4fb6ff" stroke-width="38" stroke-linecap="round"/>
+</svg>
