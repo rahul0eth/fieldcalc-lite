@@ -1,5 +1,8 @@
 # Store listing — FieldCalc 1.0.0
 
+**Status (Oct 14, 2026):** iOS submitted to App Review (App Store Connect ID `6822974161`).
+Google Play: signed bundle built, Play Console app being created.
+
 Everything submitted to the App Store and Google Play, versioned with the code.
 Screenshots: `ios/screenshots/` (1206×2622) and `android/screenshots/` (1080×2160).
 

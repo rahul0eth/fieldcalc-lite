@@ -1,152 +1,98 @@
-# FieldCalc Lite
+# FieldCalc
 
 **Useful math. Zero clutter.**
 
-> **Submitting to the App Store or Google Play?** Read
-> **[SUBMIT-TO-APP-STORES.md](SUBMIT-TO-APP-STORES.md)** — it says exactly which
-> file each store wants (it is not a zip) and where to find it.
+Ten fast field calculators for construction, MEP, and site work, plus a photo field log.
+No account, no ads, no tracking — every value and photo stays on the device, and it works offline.
 
-A fast, installable, offline-capable web app for everyday construction, MEP, and site-work
-calculations. No accounts, no backend, no tracking, no API keys. Every value you type stays
-in your own browser.
+One codebase ships three ways:
 
-Built as plain HTML, CSS, and JavaScript — no frameworks, no build step, no dependencies.
+| | Status | Link |
+|---|---|---|
+| **Web / PWA** | Live | https://rahul0eth.github.io/fieldcalc-lite/ |
+| **iOS** | Submitted, waiting for App Review | App Store ID `6822974161` · [apps.apple.com/app/id6822974161](https://apps.apple.com/app/id6822974161) once approved |
+| **Android** | Signed bundle ready; Play listing in progress | Package `io.github.rahul0eth.fieldcalc` |
+
+> **Releasing an update?** Read **[SUBMIT-TO-APP-STORES.md](SUBMIT-TO-APP-STORES.md)** —
+> exactly which file each store takes (it is not a zip) and the commands that build it.
+> Everything submitted to the stores is versioned in **[store/](store/LISTING.md)**.
 
 ---
 
-## What it does
+## Calculators
 
-Four calculators that recalculate as you type, plus a local history of your recent results.
-
-| Calculator | Inputs | Outputs |
+| Group | Calculator | Inputs → outputs |
 |---|---|---|
-| **Area & Volume** | Length, width, height/depth, units (feet or inches) | Area in ft², volume in ft³ |
-| **Slope** | Rise, run | Percent grade, angle in degrees |
-| **Round Duct Airflow** | Diameter (in), velocity (FPM) | Airflow in CFM, duct area in ft² |
-| **Pressure Conversion** | Inches water column | Pascals, psi |
+| Building | **Area & Volume** | length, width, height in ft or in → ft², ft³ |
+| | **Concrete** | length, width, thickness, waste % → yd³, 80-lb bags |
+| | **Slope** | rise, run → % grade, angle |
+| | **Stairs** | total rise, max riser → riser count, riser height |
+| Mechanical | **Round Duct Airflow** | diameter (in), velocity (FPM) → CFM, duct area |
+| | **Rect → Round Duct** | width, height (in) → equivalent round diameter, aspect ratio |
+| | **Pressure Conversion** | in. w.c. → Pa, psi |
+| | **Pipe Volume** | inside diameter (in), length (ft) → gallons, water weight |
+| Electrical & units | **Voltage Drop** | phase, Cu/Al, wire size, supply V, load A, one-way ft → volts, % |
+| | **Feet-Inches → Metric** | ft, in → mm, m |
 
 ### Formulas
 
 ```
-Area      = length × width                      (inches converted to feet first)
-Volume    = length × width × height
-Grade %   = rise ÷ run × 100
-Angle °   = atan2(rise, run) × 180 ÷ π
-CFM       = velocity × π × (diameter_ft)² ÷ 4   where diameter_ft = diameter_in ÷ 12
-Pascals   = in. w.c. × 249.0889
-PSI       = in. w.c. × 0.0360912
+Area / volume     inches ÷ 12 first; A = L × W; V = A × H
+Concrete          ft³ = L × W × (T ÷ 12) × (1 + waste); yd³ = ft³ ÷ 27; bags = ⌈ft³ ÷ 0.6⌉ (80-lb bag ≈ 0.6 ft³)
+Slope             grade = rise ÷ run × 100; angle = atan2(rise, run)
+Stairs            risers = ⌈total rise ÷ max riser⌉; riser height = total rise ÷ risers
+Duct airflow      CFM = FPM × π × (D/12)² ÷ 4
+Rect → round      De = 1.30 × (a·b)^0.625 ÷ (a + b)^0.25         (Huebscher)
+Pressure          Pa = in. w.c. × 249.0889; psi = in. w.c. × 0.0360912
+Pipe volume       gal = π × (D/12)² ÷ 4 × L × 7.48052; lb = gal × 8.34
+Voltage drop      VD = k × K × I × L ÷ CM   k = 2 (1Φ) or √3 (3Φ); K = 12.9 Cu / 21.2 Al Ω·cmil/ft
+Length            mm = (ft × 12 + in) × 25.4
 ```
 
-Invalid and zero-run inputs are handled explicitly — the app never displays `NaN` or `Infinity`.
-A zero run is reported as vertical with an undefined grade rather than a divide-by-zero result.
+Zero, blank, and negative inputs are handled explicitly; the app never shows `NaN` or
+`Infinity`. A zero run is reported as vertical with an undefined grade.
 
-### Recent results
+### Field log
 
-Each completed calculation is saved to browser `localStorage` (key `fieldcalc.recents.v1`,
-12 entries max). Nothing is transmitted anywhere. **Clear saved results** erases them.
-Filling several fields in one calculator coalesces into a single entry rather than stacking.
+**Save** stores a one-line result; **Photo** opens the camera (or photo library) and attaches
+the picture to the result; **Share** opens the native share sheet. Results live in
+`localStorage`; photos are downscaled to 1280 px and kept in IndexedDB, because localStorage's
+~5 MB cap would fill after a few. Deleting an entry deletes its photo. Max 100 entries.
 
 ---
 
-## Local testing
+## How it's built
 
-No build, no install, no npm. Serve the `dist/` folder over HTTP:
+Plain HTML, CSS, and JavaScript in one file — [`dist/index.html`](dist/index.html). No
+framework, no build step. [Capacitor 8](https://capacitorjs.com) wraps the same `dist/` folder
+as the iOS and Android apps, with three official plugins:
+
+| Plugin | Why |
+|---|---|
+| `@capacitor/keyboard` | `resize: 'native'` — otherwise iOS scrolls the web view under the keyboard, `position: sticky` stops pinning, and the header slides behind the status bar |
+| `@capacitor/share` | Native share sheet (falls back to Web Share, then clipboard) |
+| `@capacitor/haptics` | A light tap on save and share |
+
+The camera uses a plain `<input type="file" capture>`, which opens the OS camera on both
+platforms with no plugin.
+
+**Old Android WebView compatibility.** Android's System WebView can lag far behind Chrome, so
+the CSS avoids flexbox `gap` (Chrome 84+), the `inset` shorthand (87+), and bare `dvh` (108+).
+All three were caught on a real Android emulator, not in a desktop browser.
+
+## Develop
 
 ```bash
 npm start
 ```
 
-Then open <http://localhost:4178>. (That script is just
-`python3 -m http.server 4178 --directory dist` — no build step exists.)
-
-You must use a real HTTP server rather than opening `index.html` directly from the
-filesystem — service workers and the web manifest do not run from `file://`.
-
-To verify PWA behavior: load the page once, stop the server, then reload. The app should
-still open and calculate, served from the service worker cache.
-
----
-
-## Free deployment with Cloudflare Pages
-
-The app is already static, so there is no build command.
-
-1. Sign in at <https://dash.cloudflare.com> (free account).
-2. **Workers & Pages → Create → Pages → Connect to Git**.
-3. Authorize GitHub and select the `fieldcalc-lite` repository.
-4. Configure the build:
-   - **Framework preset:** `None`
-   - **Build command:** *(leave empty)*
-   - **Build output directory:** `dist`
-   - **Root directory:** `/`
-5. **Save and Deploy.**
-
-You get a `https://<project>.pages.dev` URL in about a minute, HTTPS included. Every later
-push to `main` redeploys automatically. HTTPS matters: service workers and the install
-prompt only work on HTTPS or `localhost`.
-
-### Alternative: GitHub Pages
-
-`.github/workflows/deploy.yml` publishes `dist/` to GitHub Pages on every push to `main`.
-Enable it once under **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-
----
-
-## Repository layout
-
-```
-fieldcalc-lite/
-├── README.md
-├── LICENSE                     MIT
-├── .gitignore
-├── .nvmrc                      Node 22 (required by the Capacitor CLI)
-├── package.json                Capacitor tooling only; the web app has no dependencies
-├── capacitor.config.ts         appId + webDir: dist
-├── .github/workflows/deploy.yml
-├── assets/                     1024px icon and splash sources for icon generation
-├── dist/                       the entire deployable web app
-│   ├── index.html              markup, styles, and logic in one file
-│   ├── privacy.html            privacy policy (required by both app stores)
-│   ├── manifest.webmanifest    PWA metadata
-│   ├── sw.js                   service worker, cache-first offline
-│   └── icon.svg                app icon
-├── ios/                        Xcode project (committed; you edit signing here)
-└── android/                    Android Studio project (committed)
-```
-
-`dist/` is self-contained and dependency-free. It is both the deploy target for Cloudflare
-Pages and the `webDir` for Capacitor, so the same files ship to web, iOS, and Android.
-
-The `ios/` and `android/` folders are committed on purpose: you edit signing settings,
-`Info.plist`, and store metadata inside them, so they are source, not build output.
-
----
-
-## Native builds (iOS and Android)
-
-The native projects are already scaffolded with [Capacitor](https://capacitorjs.com). They
-wrap the same `dist/` folder, so there is no second codebase to maintain.
-
-### Requirements
-
-| | Needed for |
-|---|---|
-| **Node 22+** (`.nvmrc`) | the Capacitor CLI |
-| **JDK 21+** | Android builds — JDK 17 fails with `invalid source release: 21` |
-| **Android Studio** | Android SDK, emulator, signed bundle |
-| **Xcode 16+** (Mac) | iOS builds — Command Line Tools alone are not enough |
-
-Capacitor 8 uses Swift Package Manager, so **CocoaPods is not required**.
-
-### Workflow
-
-After any change to `dist/`, copy it into both native projects:
+Serves `dist/` at <http://localhost:4178>. After editing `dist/`, copy it into both native projects:
 
 ```bash
 npm run sync
 ```
 
-Then open whichever project you want to build:
+Then open a native project:
 
 ```bash
 npm run ios
@@ -156,58 +102,45 @@ npm run ios
 npm run android
 ```
 
-To regenerate every icon and splash size after editing `assets/icon.png`:
+| Tool | Version | Note |
+|---|---|---|
+| Node | 22+ (`.nvmrc`) | Capacitor CLI requirement |
+| JDK | 21–23 | JDK 17 fails (`invalid source release: 21`); JDK 25 is too new for this Gradle (`class file major version 69`) |
+| Xcode | 26+ | plus the iOS simulator runtime (`xcodebuild -downloadPlatform iOS`) |
 
-```bash
-npm run assets
+## Repository layout
+
+```
+dist/                     the app — the only code you edit (web, iOS, and Android all ship this)
+  index.html              markup, styles, logic
+  privacy.html            privacy policy (store requirement)
+  support.html            support page (App Store requirement)
+  sw.js, manifest.webmanifest, icons
+ios/                      Xcode project; ExportOptions-*.plist for App Store archive/upload
+android/                  Android Studio project; release signing reads android/key.properties
+assets/                   1024 px icon + splash sources (npm run assets regenerates every size)
+store/                    exactly what was submitted: screenshots, feature graphic, listing copy
+release/                  built .ipa / .aab (gitignored — rebuilt per release)
+.github/workflows/        deploys dist/ to GitHub Pages on every push to main
 ```
 
-### Already configured for submission
-
-- Bundle ID / application ID `com.fieldcalc.lite`, version `0.1.0`
-- All iOS and Android icon and splash sizes generated
-- iPhone-only target (`TARGETED_DEVICE_FAMILY = 1`) — avoids needing iPad screenshots
-- `ITSAppUsesNonExemptEncryption = false` so App Store Connect stops asking each build
-- Android `targetSdk 36`, `minSdk 24`
-- The service worker is disabled inside Capacitor, where it would only serve stale
-  screens after an app update; the native shell already carries the files locally
-
-### Before you submit
-
-Apple rejects thin web wrappers under
-[Guideline 4.2](https://developer.apple.com/app-store/review/guidelines/#minimum-functionality).
-Four calculators is thin. Add native capability — share sheet, haptics, a camera photo
-attached to a saved calculation — and more calculators before submitting to the App Store.
-Google Play is more permissive, but new personal developer accounts must run a closed test
-with 12 testers for 14 continuous days before production access opens.
-
----
+**Not in the repo, on purpose:** the Android upload key lives in `~/fieldcalc-signing/`
+and `android/key.properties` is gitignored. Back that folder up — without it you cannot ship
+Android updates.
 
 ## Roadmap
 
-1. **Supabase authentication and cloud-saved calculation sets** — optional sign-in so saved
-   results follow you between devices and job sites.
-2. **Capacitor packaging for iOS and Android** — native App Store and Google Play builds
-   from this same `dist/` folder.
-3. **RevenueCat lifetime Pro purchase and Restore Purchases** — one-time unlock for an
-   expanded calculator set.
-4. **AI-assisted inspection-note or checklist feature** — turn field observations into
-   structured notes and checklists.
-
-Authentication, payments, accounts, analytics, and AI are deliberately absent from v0.1.
-
----
+1. Supabase sign-in and cloud-synced field logs
+2. RevenueCat lifetime Pro unlock with Restore Purchases
+3. AI-assisted inspection notes from field-log photos
+4. More calculators — fan laws, ductulator friction, conduit fill
 
 ## Disclaimer
 
-FieldCalc Lite is a convenience tool. Verify design and code calculations independently.
-
-It makes no claim of code compliance, engineering approval, or design suitability for any
-purpose. Results are unverified arithmetic from the values you enter. Any engineering, code,
-or life-safety decision must be reviewed and confirmed by a qualified professional against
-the applicable codes and standards for your jurisdiction and project.
-
----
+FieldCalc is a convenience tool. Verify design and code calculations independently. It makes
+no claim of code compliance, engineering approval, or design suitability. Any engineering,
+code, or life-safety decision must be confirmed by a qualified professional against the codes
+and standards that apply to your jurisdiction and project.
 
 ## License
 

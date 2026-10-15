@@ -1,148 +1,108 @@
 # SUBMIT TO APP STORES
 
-**Short answer: it is not a zip file.** Each store takes one specific built file,
-and you never hand-assemble it yourself — the build tools produce it.
+**It is not a zip.** Each store takes one signed binary that the build tools produce.
 
-| Store | What you submit | How it gets there |
+| Store | File | Where it lands |
 |---|---|---|
-| **Apple App Store** | an **archive** that Xcode turns into an `.ipa` | Xcode uploads it directly — you never touch the file |
-| **Google Play** | one file: **`app-release.aab`** (Android App Bundle) | you drag that one file into the Play Console |
+| **Apple App Store** | `.ipa` (signed **Apple Distribution**) | `release/FieldCalc-<version>-AppStore.ipa` — but you normally let `xcodebuild` upload it directly |
+| **Google Play** | `.aab` (Android App Bundle, signed with the upload key) | `release/FieldCalc-<version>-GooglePlay.aab` |
 
-You do **not** submit the `dist/` folder, the source code, a zip, or a website
-link. Those stores want a signed, compiled app binary.
-
----
-
-## Google Play — the `.aab` file
-
-### Where it appears after you build
-
-```
-android/app/build/outputs/bundle/release/app-release.aab
-```
-
-That single file is your entire submission. Roughly 4–5 MB.
-
-### One-time setup: create your signing key
-
-Play requires every app to be signed. **If you lose this key you cannot update
-your own app**, so back it up somewhere permanent.
-
-Pick a password you will not lose, then:
-
-```bash
-keytool -genkey -v -keystore ~/fieldcalc-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-```
-
-Keep the `.jks` file **outside this repository**. `~/` (your home folder) is fine.
-Never commit it — anyone with that file plus the password can publish updates
-impersonating your app.
-
-Then create `android/key.properties` (already gitignored):
-
-```
-storeFile=/Users/rahulbajaj/fieldcalc-upload.jks
-storePassword=YOUR_PASSWORD
-keyPassword=YOUR_PASSWORD
-keyAlias=upload
-```
-
-### Build the .aab
-
-```bash
-cd android && ./gradlew bundleRelease
-```
-
-Then upload `android/app/build/outputs/bundle/release/app-release.aab` at
-**Play Console → your app → Production (or Closed testing) → Create new release**.
-
-### Also required in Play Console (not files — web forms)
-
-- App icon 512×512 PNG — use `assets/icon.png`
-- Feature graphic 1024×500 — the one asset people forget; you must design it
-- At least 2 phone screenshots
-- Short description (80 chars) and full description
-- Privacy policy URL — `https://rahul0eth.github.io/fieldcalc-lite/privacy.html`
-- Data safety form — declare **no data collected, no data shared**
-- Content rating questionnaire — Everyone
+Store accounts: Apple team **`H7WA789MS5`** (individual) · App Store Connect app **`6822974161`** ·
+Play package **`io.github.rahul0eth.fieldcalc`**. Listing copy and screenshots: [`store/`](store/LISTING.md).
 
 ---
 
-## Apple App Store — the archive
+## Every release, both stores
 
-There is no file for you to find on disk. Xcode builds, signs, and uploads in
-one flow.
-
-### Steps
-
-1. Open the project:
+1. Edit `dist/`, then copy it into both native projects:
    ```bash
-   npm run ios
+   npm run sync
    ```
-2. In Xcode, select **Any iOS Device (arm64)** as the destination — not a simulator.
-   Archiving is disabled while a simulator is selected.
-3. Target **App** → **Signing & Capabilities** → check *Automatically manage signing*
-   and pick your Apple Developer team. Xcode registers the bundle ID
-   `com.fieldcalc.lite` for you.
-4. Menu: **Product → Archive**. Wait for the build.
-5. The **Organizer** window opens. Click **Distribute App → App Store Connect → Upload**.
-6. The build appears in App Store Connect after processing (5–30 minutes).
-
-### Also required in App Store Connect (web forms)
-
-- Screenshots for 6.9" iPhone, 1320×2868 — simulator screenshots are allowed.
-  **iPad screenshots are not needed** — this app is already set to iPhone-only.
-- Name (30 chars), subtitle (30 chars), description, keywords
-- Privacy policy URL — same link as above
-- App Privacy questionnaire — answer **"Data Not Collected"** for everything
-- Age rating — 4+
-- Export compliance — already answered in `Info.plist`
-  (`ITSAppUsesNonExemptEncryption = false`), so Xcode will stop asking
-
-### Already configured for you
-
-- iPhone-only target (`TARGETED_DEVICE_FAMILY = 1`)
-- Version `0.1.0`, build `1`
-- Every required icon and splash size
-- Encryption declaration
-
-### What still needs your Apple account
-
-- Selecting your signing team in Xcode (needs you to be signed in)
-- Creating the app record in App Store Connect
+2. **Bump the version** — both stores reject a build number they have already seen:
+   - `android/app/build.gradle` → `versionCode` (integer, +1 every upload) and `versionName`
+   - `ios/App/App.xcodeproj/project.pbxproj` → `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` (+1 every upload)
+   - `package.json` → `version`
 
 ---
 
-## Where everything lives
+## Apple App Store
 
-```
-fieldcalc-lite/
-├── SUBMIT-TO-APP-STORES.md   ← you are here
-├── dist/                     the actual app (HTML/CSS/JS) — edit this
-├── assets/icon.png           1024px source for store listings
-├── android/                  Android Studio project
-│   └── app/build/outputs/bundle/release/app-release.aab   ← SUBMIT THIS to Play
-└── ios/                      Xcode project
-    └── App/App.xcworkspace   ← open this, then Product → Archive for Apple
-```
-
-Build output folders (`android/app/build/`, Xcode's DerivedData) are **not**
-committed to git — they are regenerated by each build. That is normal and correct.
-
----
-
-## After changing the app
-
-`dist/` is the single source of truth for all three platforms. After editing it:
+### Build and upload (≈5 minutes, no Xcode GUI needed)
 
 ```bash
-npm run sync
+cd ios/App && xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -archivePath ../../release/FieldCalc.xcarchive CODE_SIGNING_ALLOWED=NO archive
 ```
 
-That copies `dist/` into both native projects. Then rebuild and re-upload.
+```bash
+xcodebuild -exportArchive -archivePath release/FieldCalc.xcarchive -exportOptionsPlist ios/ExportOptions-Upload.plist -exportPath release/upload -allowProvisioningUpdates
+```
 
-Bump the version before every store upload — stores reject a duplicate version:
+**Why archive unsigned?** A normal signed archive first signs with a *development* identity,
+which needs a registered iPhone — and the team has none. App Store profiles need no devices,
+so the archive is built unsigned and the export step signs it with **Apple Distribution**
+(Xcode creates the certificate and profile automatically). Use `ExportOptions-AppStore.plist`
+instead to get a local `.ipa` without uploading.
 
-- `package.json` → `version`
-- `android/app/build.gradle` → `versionCode` (integer, must increase) and `versionName`
-- Xcode → target **App** → **General** → Version and Build
+Xcode must be signed into the Apple ID (Xcode → Settings → Accounts).
+
+### Then in App Store Connect
+
+1. Wait for the build to finish processing (5–30 min) — TestFlight shows **Ready to Submit**
+2. App Store tab → new version → **Build → Add Build**
+3. Update screenshots or text if they changed
+4. **Add for Review → Submit for Review**
+
+Already configured and does not need repeating: privacy label (**Data Not Collected**),
+age rating (**4+**), content rights, pricing (**Free**), availability (148 countries — EU
+excluded until a trader-status declaration is made in Business), export compliance
+(`ITSAppUsesNonExemptEncryption = false` in `Info.plist`).
+
+**Gotchas hit on the first submission**
+- "Sign-in required" under App Review Information defaults to **on**. FieldCalc has no login — leave it off.
+- Screenshot size is **1206 × 2622** ("iPhone with Dynamic Island, medium display"), not 6.9″.
+- The App Information page sometimes answers *"Sorry, something went wrong"* — retry Save.
+
+---
+
+## Google Play
+
+### Build the signed bundle
+
+```bash
+cd android && JAVA_HOME=/usr/local/Cellar/openjdk/23.0.2/libexec/openjdk.jdk/Contents/Home ./gradlew bundleRelease
+```
+
+Output: `android/app/build/outputs/bundle/release/app-release.aab`. Copy it to `release/`.
+
+Signing comes from `android/key.properties` (gitignored), which points at
+`~/fieldcalc-signing/upload.jks`. **Back up `~/fieldcalc-signing/`** — its README holds the
+password. Losing it means asking Google to reset your upload key before you can ship again.
+
+### Then in Play Console
+
+**Test and release → Internal testing → Create new release** → upload the `.aab` → roll out.
+
+New personal developer accounts must run a **closed test with at least 12 testers for 14
+continuous days** before production access is granted.
+
+### Listing assets (all in `store/android/`)
+
+| Asset | Size |
+|---|---|
+| App icon | 512 × 512 |
+| Feature graphic | 1024 × 500 |
+| Phone screenshots | 1080 × 2160 — Play rejects anything taller than 2:1 |
+
+---
+
+## Testing on simulators and emulators
+
+**iOS:** `npm run sync`, build for the simulator, `xcrun simctl install booted <App.app>`.
+For store screenshots, give the simulator a clean status bar first:
+
+```bash
+xcrun simctl status_bar booted override --time "9:41" --batteryState discharging --batteryLevel 100 --cellularBars 4 --wifiBars 3
+```
+
+**Android:** AVD `FieldCalc_API34` (Pixel 7, Android 14). Build `./gradlew assembleDebug`, then
+`adb install -r app/build/outputs/apk/debug/app-debug.apk`.
