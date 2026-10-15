@@ -1,8 +1,8 @@
 // FieldCalc Lite service worker.
 // Cache-first for the app shell; bump CACHE on every release.
-var CACHE = "fieldcalc-v1.0.1";
+var CACHE = "fieldcalc-v1.0.2";
 var ASSETS = [
-  "./", "./index.html", "./privacy.html",
+  "./", "./index.html", "./privacy.html", "./support.html",
   "./manifest.webmanifest", "./icon.svg",
   "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png"
 ];

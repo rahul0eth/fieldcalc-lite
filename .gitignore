@@ -18,3 +18,6 @@ icons/
 android/key.properties
 *.jks
 *.keystore
+
+# Built store uploads (regenerate with the steps in SUBMIT-TO-APP-STORES.md)
+release/
