@@ -1,7 +1,16 @@
 # Store listing — FieldCalc 1.0.0
 
-**Status (Oct 14, 2026):** iOS submitted to App Review (App Store Connect ID `6822974161`).
-Google Play: signed bundle built, Play Console app being created.
+**Status (Oct 14, 2026)**
+- **iOS** — 1.0.0 (1) *Waiting for Review* (App Store Connect `6822974161`); auto-release on approval.
+- **Google Play** — 1 (1.0.0) live on **internal testing**
+  ([opt-in](https://play.google.com/apps/internaltest/4701726493601413735)); closed testing
+  (151 countries, EU excluded) plus the store listing and all app-content declarations sent
+  to Google review. Production unlocks after **12 testers opt in for 14 continuous days**.
+
+Play declarations as submitted: no ads, no advertising ID, no data collected or shared,
+no app access restrictions, target audience 18+, content rating Everyone / PEGI 3 / 3+,
+category Tools, no financial or health features, not a government app. The icon and feature
+graphic are labeled as AI-created (code-drawn by Claude); the screenshots are real captures.
 
 Everything submitted to the App Store and Google Play, versioned with the code.
 Screenshots: `ios/screenshots/` (1206×2622) and `android/screenshots/` (1080×1920 — Play requires exactly 9:16).

@@ -11,7 +11,7 @@ One codebase ships three ways:
 |---|---|---|
 | **Web / PWA** | Live | https://rahul0eth.github.io/fieldcalc-lite/ |
 | **iOS** | Submitted, waiting for App Review | App Store ID `6822974161` · [apps.apple.com/app/id6822974161](https://apps.apple.com/app/id6822974161) once approved |
-| **Android** | Signed bundle ready; Play listing in progress | Package `io.github.rahul0eth.fieldcalc` |
+| **Android** | Internal testing live; closed test + listing in Google review | Package `io.github.rahul0eth.fieldcalc` · [internal test opt-in](https://play.google.com/apps/internaltest/4701726493601413735) |
 
 > **Releasing an update?** Read **[SUBMIT-TO-APP-STORES.md](SUBMIT-TO-APP-STORES.md)** —
 > exactly which file each store takes (it is not a zip) and the commands that build it.
