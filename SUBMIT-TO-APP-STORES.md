@@ -91,7 +91,7 @@ continuous days** before production access is granted.
 |---|---|
 | App icon | 512 × 512 |
 | Feature graphic | 1024 × 500 |
-| Phone screenshots | 1080 × 2160 — Play rejects anything taller than 2:1 |
+| Phone screenshots | 1080 × 1920 — exactly **9:16**; Play stores 1:2 images but leaves the listing task incomplete |
 
 ---
 

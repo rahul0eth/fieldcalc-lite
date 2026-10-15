@@ -4,7 +4,7 @@
 Google Play: signed bundle built, Play Console app being created.
 
 Everything submitted to the App Store and Google Play, versioned with the code.
-Screenshots: `ios/screenshots/` (1206×2622) and `android/screenshots/` (1080×2160).
+Screenshots: `ios/screenshots/` (1206×2622) and `android/screenshots/` (1080×1920 — Play requires exactly 9:16).
 
 | | |
 |---|---|
