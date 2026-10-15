@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>FieldCalc Lite — Useful math. Zero clutter.</title>
-<meta name="description" content="Fast field calculations for construction, MEP, and site work. Values stay on this device.">
+<title>FieldCalc — Useful math. Zero clutter.</title>
+<meta name="description" content="Ten fast field calculators for construction, MEP, and site work, with a photo field log. Values stay on this device.">
 <meta name="theme-color" content="#06090f">
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="manifest.webmanifest">
@@ -15,15 +15,9 @@
 <meta name="apple-mobile-web-app-title" content="FieldCalc">
 <style>
 :root{
-  --bg:#06090f;
-  --ink:#f2f6ff;
-  --muted:#8fa0c0;
-  --dim:#5e708f;
-  --accent:#54a8ff;
-  --accent-soft:rgba(84,168,255,.14);
-  --amber:#ffb63d;
-  --line:rgba(255,255,255,.08);
-  --line-strong:rgba(255,255,255,.14);
+  --bg:#06090f; --ink:#f2f6ff; --muted:#8fa0c0; --dim:#5e708f;
+  --accent:#54a8ff; --accent-soft:rgba(84,168,255,.14); --amber:#ffb63d;
+  --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.14);
   --surface:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
   --r-lg:22px; --r-md:16px; --r-sm:12px;
   --ease:cubic-bezier(.22,.8,.26,1);
@@ -32,15 +26,10 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;height:100%}
 body{
-  margin:0;min-height:100%;
-  background:var(--bg);
-  color:var(--ink);
+  margin:0;min-height:100%;background:var(--bg);color:var(--ink);
   font:400 16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Roboto,system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased;
-  -webkit-tap-highlight-color:transparent;
-  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overflow-x:hidden;
 }
-/* ambient light — fixed so it never scrolls away */
 body::before{
   content:"";position:fixed;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:0;
   background:
@@ -51,600 +40,682 @@ body::before{
 .shell{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 18px calc(var(--tabh) + 34px);
   min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 main{flex:1;display:flex;flex-direction:column}
+.view{animation:rise .26s var(--ease) both}
+.view[hidden]{display:none}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.view,.entry{animation:none}}
 
-/* ───────────── header ───────────── */
-.top{
-  position:sticky;top:0;z-index:30;
-  margin:0 -18px;padding:0 18px;
-  padding-top:env(safe-area-inset-top);
-  background:linear-gradient(180deg,rgba(6,9,15,.92),rgba(6,9,15,.74) 70%,transparent);
-  backdrop-filter:blur(16px) saturate(160%);
-  -webkit-backdrop-filter:blur(16px) saturate(160%);
-}
+/* header */
+.top{position:sticky;top:0;z-index:30;margin:0 -18px;padding:0 18px;padding-top:env(safe-area-inset-top);
+  background:linear-gradient(180deg,rgba(6,9,15,.94),rgba(6,9,15,.78) 70%,transparent);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
 .top-in{display:flex;align-items:center;height:56px}
-.brand{display:flex;align-items:center;min-width:0}
+.brand{display:flex;align-items:center;min-width:0;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
 .brand svg{width:26px;height:26px;flex:none;display:block}
 .brand b{font-size:16.5px;font-weight:620;letter-spacing:-.022em;margin-left:9px;white-space:nowrap}
-.ver{
-  margin-left:9px;flex:none;
-  font-size:10.5px;font-weight:550;letter-spacing:.02em;color:var(--dim);
-  border:1px solid var(--line);border-radius:999px;padding:3.5px 9px;
-}
+.ver{margin-left:9px;flex:none;font-size:10.5px;font-weight:550;letter-spacing:.02em;color:var(--dim);
+  border:1px solid var(--line);border-radius:999px;padding:3.5px 9px}
 .grow{flex:1}
-#install{
-  display:none;flex:none;font:inherit;font-size:13px;font-weight:600;
-  color:#1b1200;background:linear-gradient(180deg,#ffc45c,#ff9f1a);
-  border:0;border-radius:999px;padding:8px 15px;cursor:pointer;
-  box-shadow:0 6px 18px -8px rgba(255,170,40,.8);
-}
-#install:active{transform:translateY(1px)}
+#install{display:none;flex:none;font:inherit;font-size:13px;font-weight:600;color:#1b1200;
+  background:linear-gradient(180deg,#ffc45c,#ff9f1a);border:0;border-radius:999px;padding:8px 15px;cursor:pointer}
 
-/* ───────────── intro ───────────── */
-.hero{padding:16px 2px 18px}
-.kicker{
-  margin:0 0 7px;font-size:11px;font-weight:650;letter-spacing:.17em;
-  text-transform:uppercase;color:var(--accent);
-}
-.hero h1{
-  margin:0 0 7px;font-size:clamp(22px,6.2vw,27px);line-height:1.12;
-  letter-spacing:-.03em;font-weight:650;
-}
+/* home */
+.hero{padding:16px 2px 4px}
+.kicker{margin:0 0 7px;font-size:11px;font-weight:650;letter-spacing:.17em;text-transform:uppercase;color:var(--accent)}
+.hero h1{margin:0 0 7px;font-size:clamp(23px,6.4vw,28px);line-height:1.12;letter-spacing:-.03em;font-weight:650}
 .hero p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.5;max-width:44ch}
+.cat{margin:24px 2px 10px;font-size:10.5px;font-weight:650;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{text-align:left;font:inherit;color:var(--ink);cursor:pointer;
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 14px 13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 16px 32px -24px rgba(0,0,0,.9);
+  display:flex;flex-direction:column;align-items:flex-start;min-height:116px;
+  transition:transform .12s var(--ease),border-color .16s var(--ease)}
+.tile:active{transform:scale(.97)}
+.tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ico{width:34px;height:34px;flex:none;border-radius:11px;background:var(--accent-soft);
+  border:1px solid rgba(84,168,255,.22);display:grid;place-items:center;color:var(--accent)}
+.ico svg{width:17px;height:17px;display:block}
+.tile .t{display:block;margin-top:13px;font-size:14.5px;font-weight:620;letter-spacing:-.015em;line-height:1.25}
+.tile .d{display:block;margin-top:3px;font-size:11.5px;color:var(--dim);line-height:1.35}
 
-/* ───────────── panels ───────────── */
-.panel[hidden]{display:none}
-.panel{animation:rise .26s var(--ease) both;margin-bottom:22px}
-@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.panel{animation:none}}
-
-.panel-head{display:flex;align-items:center;margin:0 2px 13px}
-.panel-head > * + *{margin-left:10px}
-.panel-head .ico{
-  width:34px;height:34px;flex:none;border-radius:11px;
-  background:var(--accent-soft);border:1px solid rgba(84,168,255,.22);
-  display:grid;place-items:center;color:var(--accent);
-}
-.panel-head .ico svg{width:17px;height:17px;display:block}
-.panel-head h2{margin:0;font-size:16px;font-weight:620;letter-spacing:-.018em}
-.panel-head p{margin:2px 0 0;font-size:12.5px;color:var(--dim);line-height:1.35}
-
-/* readout */
-.readout{
-  position:relative;overflow:hidden;
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:var(--r-lg);
-  padding:22px 22px 18px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 26px 50px -30px rgba(0,0,0,.95);
-}
-.readout::after{
-  content:"";position:absolute;top:-40%;right:-10%;left:-10%;height:130px;pointer-events:none;
-  background:radial-gradient(60% 100% at 50% 0,rgba(84,168,255,.22),transparent 70%);
-}
-.rlabel{
-  font-size:10.5px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--dim);
-}
-.rvalue{
-  display:flex;align-items:baseline;margin-top:7px;
-  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;
-}
+/* calculator */
+.calc-top{display:flex;align-items:center;margin:8px 0 14px}
+.calc-top > * + *{margin-left:11px}
+.back{width:38px;height:38px;flex:none;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.back svg{width:18px;height:18px}
+.calc-top h2{margin:0;font-size:16.5px;font-weight:630;letter-spacing:-.02em;line-height:1.2}
+.calc-top p{margin:2px 0 0;font-size:12.5px;color:var(--dim);line-height:1.3}
+.readout{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:22px 22px 18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 26px 50px -30px rgba(0,0,0,.95)}
+.readout::after{content:"";position:absolute;top:-40%;right:-10%;left:-10%;height:130px;pointer-events:none;
+  background:radial-gradient(60% 100% at 50% 0,rgba(84,168,255,.22),transparent 70%)}
+.rlabel{font-size:10.5px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.rvalue{display:flex;align-items:baseline;margin-top:7px;font-variant-numeric:tabular-nums}
 .rvalue > * + *{margin-left:9px}
-.rvalue .n{
-  font-size:clamp(42px,13.5vw,56px);font-weight:640;letter-spacing:-.045em;
-  line-height:1;color:var(--ink);
-  overflow-wrap:anywhere;
-  transition:opacity .14s var(--ease);
-}
-.rvalue .u{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:-.01em}
-.rsub{
-  display:flex;align-items:baseline;
-  margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
-  font-variant-numeric:tabular-nums;
-}
+.rvalue .n{font-size:clamp(40px,13vw,56px);font-weight:640;letter-spacing:-.045em;line-height:1;overflow-wrap:anywhere}
+.rvalue .u{font-size:15px;font-weight:600;color:var(--muted)}
+.rsub{display:flex;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
 .rsub > * + *{margin-left:8px}
 .rsub .k{font-size:12px;color:var(--dim);font-weight:550}
-.rsub .grow{flex:1}
 .rsub .v{font-size:17px;font-weight:620;color:var(--amber);letter-spacing:-.02em}
 .rsub .v small{font-size:11.5px;font-weight:600;color:var(--dim);margin-left:3px}
-
-.note{
-  display:flex;align-items:flex-start;
-  margin:12px 2px 0;font-size:12.5px;line-height:1.45;color:var(--amber);
-}
+.note{display:flex;align-items:flex-start;margin:12px 2px 0;font-size:12.5px;line-height:1.45;color:var(--amber)}
 .note:empty{display:none}
-.note::before{content:"!";flex:none;width:15px;height:15px;border-radius:50%;
-  background:rgba(255,182,61,.16);color:var(--amber);font-size:10px;font-weight:800;
-  display:grid;place-items:center;margin-top:1px;margin-right:8px}
+.note::before{content:"!";flex:none;width:15px;height:15px;border-radius:50%;margin:1px 8px 0 0;
+  background:rgba(255,182,61,.16);color:var(--amber);font-size:10px;font-weight:800;display:grid;place-items:center}
 
-/* inputs */
-.inputs{display:grid;gap:11px;margin-top:16px}
-.two{grid-template-columns:1fr 1fr}
-@media(max-width:379px){.two{grid-template-columns:1fr}}
-.fld label{
-  display:block;margin:0 0 6px 2px;
-  font-size:10.5px;font-weight:650;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);
-}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.fields.one{grid-template-columns:1fr}
+.fields > .fld:last-child:nth-child(odd){grid-column:1 / -1}
+@media(max-width:359px){.fields{grid-template-columns:1fr}}
+.fld label,.fld .lbl{display:block;margin:0 0 6px 2px;font-size:10.5px;font-weight:650;letter-spacing:.11em;text-transform:uppercase;color:var(--dim)}
 .box{position:relative;display:block}
-.box input{
-  width:100%;height:54px;
-  font:inherit;font-size:19px;font-weight:580;letter-spacing:-.02em;
-  font-variant-numeric:tabular-nums;
-  color:var(--ink);background:rgba(255,255,255,.035);
-  border:1px solid var(--line);border-radius:var(--r-md);
-  padding:0 46px 0 15px;
-  appearance:none;-webkit-appearance:none;
-  transition:border-color .16s var(--ease),background .16s var(--ease),box-shadow .16s var(--ease);
-}
+.box input,.box select{width:100%;height:54px;font:inherit;font-size:19px;font-weight:580;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;color:var(--ink);background:rgba(255,255,255,.035);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:0 50px 0 15px;
+  appearance:none;-webkit-appearance:none;transition:border-color .16s,background .16s,box-shadow .16s}
+.box select{font-size:17px;padding-right:38px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%238fa0c0' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;background-size:11px}
 .box input::placeholder{color:var(--dim);font-weight:500}
-.box input:focus{
-  outline:none;border-color:rgba(84,168,255,.65);
-  background:rgba(84,168,255,.05);
-  box-shadow:0 0 0 3.5px rgba(84,168,255,.14);
-}
+.box input:focus,.box select:focus{outline:none;border-color:rgba(84,168,255,.65);background-color:rgba(84,168,255,.05);box-shadow:0 0 0 3.5px rgba(84,168,255,.14)}
 .box input::-webkit-outer-spin-button,.box input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .box input[type=number]{-moz-appearance:textfield}
-.box .suf{
-  position:absolute;right:14px;top:50%;transform:translateY(-50%);
-  font-size:12.5px;font-weight:600;color:var(--dim);pointer-events:none;
-}
-
-/* segmented ft / in */
-.seg{display:flex;background:rgba(255,255,255,.035);border:1px solid var(--line);
-  border-radius:var(--r-md);padding:4px;height:54px}
+.box .suf{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12.5px;font-weight:600;color:var(--dim);pointer-events:none}
+.seg{display:flex;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:var(--r-md);padding:4px;height:54px}
 .seg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
-.seg label{
-  flex:1;display:grid;place-items:center;border-radius:11px;cursor:pointer;
-  font-size:14px;font-weight:600;color:var(--muted);letter-spacing:-.01em;
-  transition:background .18s var(--ease),color .18s var(--ease);
-  margin:0;text-transform:none;
-}
-.seg input:checked + label{background:rgba(255,255,255,.1);color:var(--ink);
-  box-shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 4px 12px -6px rgba(0,0,0,.9)}
+.seg label{flex:1;display:grid;place-items:center;border-radius:11px;cursor:pointer;margin:0;
+  font-size:14px;font-weight:600;color:var(--muted);letter-spacing:-.01em;text-transform:none;
+  transition:background .18s,color .18s}
+.seg input:checked + label{background:rgba(255,255,255,.1);color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px -6px rgba(0,0,0,.9)}
 .seg input:focus-visible + label{outline:2px solid var(--accent);outline-offset:2px}
 
-/* ───────────── saved ───────────── */
-.saved-top{display:flex;align-items:center;margin:0 2px 13px}
-.saved-top > * + *{margin-left:10px}
-.saved-top h2{margin:0;font-size:16px;font-weight:620;letter-spacing:-.018em}
-.btn-ghost{
-  font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);
-  background:rgba(255,255,255,.04);border:1px solid var(--line);
-  border-radius:999px;padding:8px 14px;cursor:pointer;
-  transition:color .16s,border-color .16s;
-}
-.btn-ghost:hover{color:var(--ink);border-color:var(--line-strong)}
-ul#recents{list-style:none;margin:0;padding:0;display:grid;gap:9px}
-ul#recents li{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
-  padding:13px 15px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-  animation:rise .22s var(--ease) both;
-}
-li .row1{display:flex;align-items:center;margin-bottom:5px}
-li .row1 > * + *{margin-left:8px}
-li .tag{
-  font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--accent);background:var(--accent-soft);
-  border-radius:5px;padding:3px 7px;
-}
-li .when{margin-left:auto;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
-li .txt{font-size:14.5px;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.012em;line-height:1.4}
-.empty{
-  border:1px dashed var(--line-strong);border-radius:var(--r-lg);
-  padding:40px 24px;text-align:center;
-}
-.empty .eico{
-  width:46px;height:46px;margin:0 auto 14px;border-radius:14px;
-  background:rgba(255,255,255,.04);border:1px solid var(--line);
-  display:grid;place-items:center;color:var(--dim);
-}
-.empty .eico svg{width:21px;height:21px}
-.empty b{display:block;font-size:15.5px;font-weight:620;margin-bottom:6px;letter-spacing:-.015em}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:18px}
+.act{font:inherit;font-size:13.5px;font-weight:620;color:var(--ink);background:rgba(255,255,255,.045);
+  border:1px solid var(--line);border-radius:14px;height:50px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:transform .12s,opacity .16s}
+.act svg{width:17px;height:17px;margin-right:7px;color:var(--accent);flex:none}
+.act.primary{background:linear-gradient(180deg,#63b4ff,#3f8fe6);border-color:transparent;color:#04121f}
+.act.primary svg{color:#04121f}
+.act:active{transform:scale(.97)}
+.act:disabled{opacity:.38;cursor:default}
+
+/* log */
+.log-top{display:flex;align-items:center;margin:8px 2px 14px}
+.log-top h2{margin:0;font-size:19px;font-weight:650;letter-spacing:-.025em}
+.log-top p{margin:2px 0 0;font-size:12.5px;color:var(--dim)}
+.btn-ghost{font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.04);
+  border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;flex:none}
+#entries{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.entry{display:flex;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);animation:rise .22s var(--ease) both}
+.thumb{width:68px;height:68px;flex:none;border-radius:11px;object-fit:cover;margin-right:12px;
+  background:#0b1220;border:1px solid var(--line);cursor:zoom-in;padding:0}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block}
+.ebody{flex:1;min-width:0}
+.row1{display:flex;align-items:center;margin-bottom:5px}
+.tag{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  background:var(--accent-soft);border-radius:5px;padding:3px 7px}
+.when{margin-left:auto;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.etxt{font-size:14.5px;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.012em;line-height:1.4;overflow-wrap:anywhere}
+.ops{display:flex;margin-top:9px}
+.ops > * + *{margin-left:7px}
+.op{font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.04);
+  border:1px solid var(--line);border-radius:9px;padding:6px 10px;cursor:pointer;display:flex;align-items:center}
+.op svg{width:13px;height:13px;margin-right:5px}
+.empty{border:1px dashed var(--line-strong);border-radius:var(--r-lg);padding:40px 24px;text-align:center}
+.empty .ico{margin:0 auto 14px;width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.04);border-color:var(--line);color:var(--dim)}
+.empty .ico svg{width:21px;height:21px}
+.empty b{display:block;font-size:15.5px;font-weight:620;margin-bottom:6px}
 .empty span{font-size:13.5px;color:var(--dim);line-height:1.5}
 
-/* ───────────── disclaimer ───────────── */
-.disc{
-  margin:0 2px;margin-top:auto;padding:13px 15px;
-  border:1px solid var(--line);border-left:2px solid var(--amber);
-  border-radius:var(--r-sm);background:rgba(255,182,61,.045);
-  font-size:12px;line-height:1.5;color:var(--muted);
-}
+.disc{margin:26px 2px 0;margin-top:auto;padding:13px 15px;border:1px solid var(--line);border-left:2px solid var(--amber);
+  border-radius:var(--r-sm);background:rgba(255,182,61,.045);font-size:12px;line-height:1.5;color:var(--muted)}
+main > .view{margin-bottom:26px}
 .disc a{color:var(--muted)}
 
-/* ───────────── tab bar ───────────── */
-.tabs{
-  position:fixed;left:0;right:0;bottom:0;z-index:40;
-  padding:0 14px calc(env(safe-area-inset-bottom) + 10px);
-  pointer-events:none;
-}
-.tabs-in{
-  pointer-events:auto;
-  max-width:460px;margin:0 auto;
-  display:grid;grid-template-columns:repeat(5,1fr);
-  background:rgba(14,19,30,.82);
-  border:1px solid var(--line-strong);
-  border-radius:20px;padding:6px;
-  backdrop-filter:blur(22px) saturate(180%);
-  -webkit-backdrop-filter:blur(22px) saturate(180%);
-  box-shadow:0 18px 40px -18px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.07);
-}
-.tab{
-  position:relative;border:0;background:transparent;cursor:pointer;
-  font:inherit;color:var(--dim);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:7px 2px 6px;border-radius:14px;
-  transition:color .18s var(--ease),background .18s var(--ease);
-}
+/* tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:0 14px calc(env(safe-area-inset-bottom) + 10px);pointer-events:none}
+.tabs-in{pointer-events:auto;max-width:300px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;
+  background:rgba(14,19,30,.84);border:1px solid var(--line-strong);border-radius:20px;padding:6px;
+  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+  box-shadow:0 18px 40px -18px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.07)}
+.tab{position:relative;border:0;background:transparent;cursor:pointer;font:inherit;color:var(--dim);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 6px;border-radius:14px;
+  transition:color .18s,background .18s}
 .tab svg{width:20px;height:20px;display:block}
-.tab span{margin-top:3px;font-size:9.5px;font-weight:620;letter-spacing:.01em}
+.tab span{margin-top:3px;font-size:10px;font-weight:620}
 .tab[aria-selected="true"]{color:var(--accent);background:var(--accent-soft)}
-.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.tab:active{transform:scale(.94)}
+.tab:active{transform:scale(.95)}
+.badge{position:absolute;top:4px;right:calc(50% - 22px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;
+  background:var(--amber);color:#1b1200;font-size:9.5px;font-weight:800;display:grid;place-items:center}
+.badge:empty{display:none}
+body.typing .tabs{display:none}
 
+.toast{position:fixed;left:50%;bottom:calc(var(--tabh) + 22px);z-index:60;pointer-events:none;
+  transform:translate(-50%,10px);opacity:0;transition:opacity .2s,transform .2s;
+  background:rgba(22,30,46,.96);border:1px solid var(--line-strong);color:var(--ink);
+  font-size:13px;font-weight:600;padding:10px 16px;border-radius:999px;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.viewer{position:fixed;top:0;right:0;bottom:0;left:0;z-index:80;background:rgba(3,5,9,.96);
+  display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 20px)}
+.viewer[hidden]{display:none}
+.viewer img{max-width:100%;max-height:100%;border-radius:14px;display:block}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-
-@media(min-width:640px){
-  .shell{padding-bottom:calc(var(--tabh) + 40px)}
-  .hero{padding:24px 2px 22px}
-}
 </style>
 </head>
 <body>
 
 <div class="shell">
-
   <header class="top">
     <div class="top-in">
-      <span class="brand">
+      <button class="brand" id="home-btn" type="button" aria-label="FieldCalc home">
         <svg viewBox="0 0 48 48" aria-hidden="true">
           <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#0d1420" stroke="rgba(255,255,255,.16)" stroke-width="1.5"/>
           <path d="M12 33.5 L24 13 L36 33.5" fill="none" stroke="#ffb63d" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M17.5 33.5 H30.5" fill="none" stroke="#54a8ff" stroke-width="3.6" stroke-linecap="round"/>
         </svg>
-        <b>FieldCalc Lite</b>
-      </span>
-      <span class="ver">v0.1 · local only</span>
+        <b>FieldCalc</b>
+      </button>
+      <span class="ver">v1.0 · local only</span>
       <span class="grow"></span>
       <button id="install" type="button">Install</button>
     </div>
   </header>
 
-  <section class="hero">
-    <p class="kicker">Useful math. Zero clutter.</p>
-    <h1>Field math,<br>done fast.</h1>
-    <p>Fast field calculations for construction, MEP, and site work. Values stay on this device.</p>
-  </section>
-
   <main>
-    <!-- ───── Area & Volume ───── -->
-    <section class="panel" id="p-area" role="tabpanel" aria-labelledby="t-area">
-      <div class="panel-head">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M9 3v18"/><rect x="3" y="3" width="18" height="18" rx="2.5"/></svg></span>
-        <div><h2>Area &amp; Volume</h2><p>Rectangular footprint</p></div>
+    <section class="view" id="v-home" aria-label="Calculators">
+      <div class="hero">
+        <p class="kicker">Useful math. Zero clutter.</p>
+        <h1>Field math, done fast.</h1>
+        <p>Fast field calculations for construction, MEP, and site work. Values stay on this device.</p>
       </div>
-      <div class="readout">
-        <div class="rlabel">Area</div>
-        <div class="rvalue"><span class="n" id="o-area">—</span><span class="u">ft²</span></div>
-        <div class="rsub"><span class="k">Volume</span><span class="grow"></span><span class="v" id="o-vol">—<small>ft³</small></span></div>
-      </div>
-      <p class="note" id="n-area" role="status"></p>
-      <div class="inputs">
-        <div class="two" style="display:grid;gap:11px;grid-template-columns:1fr 1fr">
-          <div class="fld"><label for="i-l">Length</label>
-            <span class="box"><input id="i-l" type="number" inputmode="decimal" step="any" min="0" value="10" placeholder="0"><span class="suf" id="s-l">ft</span></span></div>
-          <div class="fld"><label for="i-w">Width</label>
-            <span class="box"><input id="i-w" type="number" inputmode="decimal" step="any" min="0" value="8" placeholder="0"><span class="suf" id="s-w">ft</span></span></div>
-        </div>
-        <div class="two" style="display:grid;gap:11px;grid-template-columns:1fr 1fr">
-          <div class="fld"><label for="i-h">Height / depth</label>
-            <span class="box"><input id="i-h" type="number" inputmode="decimal" step="any" min="0" value="9" placeholder="0"><span class="suf" id="s-h">ft</span></span></div>
-          <div class="fld"><label id="lbl-u">Units</label>
-            <div class="seg" role="radiogroup" aria-labelledby="lbl-u">
-              <input type="radio" name="unit" id="u-ft" value="ft" checked><label for="u-ft">Feet</label>
-              <input type="radio" name="unit" id="u-in" value="in"><label for="u-in">Inches</label>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="home-cats"></div>
     </section>
 
-    <!-- ───── Slope ───── -->
-    <section class="panel" id="p-slope" role="tabpanel" aria-labelledby="t-slope" hidden>
-      <div class="panel-head">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M3 20L17 6M17 6v6"/></svg></span>
-        <div><h2>Slope</h2><p>Rise over run — same unit for both</p></div>
-      </div>
-      <div class="readout">
-        <div class="rlabel">Grade</div>
-        <div class="rvalue"><span class="n" id="o-grade">—</span><span class="u">%</span></div>
-        <div class="rsub"><span class="k">Angle</span><span class="grow"></span><span class="v" id="o-ang">—<small>deg</small></span></div>
-      </div>
-      <p class="note" id="n-slope" role="status"></p>
-      <div class="inputs">
-        <div class="two" style="display:grid;gap:11px;grid-template-columns:1fr 1fr">
-          <div class="fld"><label for="i-rise">Rise</label>
-            <span class="box"><input id="i-rise" type="number" inputmode="decimal" step="any" value="1" placeholder="0"></span></div>
-          <div class="fld"><label for="i-run">Run</label>
-            <span class="box"><input id="i-run" type="number" inputmode="decimal" step="any" value="48" placeholder="0"></span></div>
-        </div>
-      </div>
-    </section>
+    <section class="view" id="v-calc" hidden></section>
 
-    <!-- ───── Duct ───── -->
-    <section class="panel" id="p-duct" role="tabpanel" aria-labelledby="t-duct" hidden>
-      <div class="panel-head">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8M13 9l3 3-3 3"/></svg></span>
-        <div><h2>Round Duct Airflow</h2><p>CFM from diameter and velocity</p></div>
-      </div>
-      <div class="readout">
-        <div class="rlabel">Airflow</div>
-        <div class="rvalue"><span class="n" id="o-cfm">—</span><span class="u">CFM</span></div>
-        <div class="rsub"><span class="k">Duct area</span><span class="grow"></span><span class="v" id="o-darea">—<small>ft²</small></span></div>
-      </div>
-      <p class="note" id="n-duct" role="status"></p>
-      <div class="inputs">
-        <div class="two" style="display:grid;gap:11px;grid-template-columns:1fr 1fr">
-          <div class="fld"><label for="i-dia">Diameter</label>
-            <span class="box"><input id="i-dia" type="number" inputmode="decimal" step="any" min="0" value="10" placeholder="0"><span class="suf">in</span></span></div>
-          <div class="fld"><label for="i-vel">Velocity</label>
-            <span class="box"><input id="i-vel" type="number" inputmode="decimal" step="any" min="0" value="900" placeholder="0"><span class="suf">FPM</span></span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ───── Pressure ───── -->
-    <section class="panel" id="p-press" role="tabpanel" aria-labelledby="t-press" hidden>
-      <div class="panel-head">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4.5-5"/></svg></span>
-        <div><h2>Pressure Conversion</h2><p>Inches water column to Pa and psi</p></div>
-      </div>
-      <div class="readout">
-        <div class="rlabel">Pascals</div>
-        <div class="rvalue"><span class="n" id="o-pa">—</span><span class="u">Pa</span></div>
-        <div class="rsub"><span class="k">PSI</span><span class="grow"></span><span class="v" id="o-psi">—<small>psi</small></span></div>
-      </div>
-      <p class="note" id="n-press" role="status"></p>
-      <div class="inputs">
-        <div class="fld"><label for="i-wc">Inches water column</label>
-          <span class="box"><input id="i-wc" type="number" inputmode="decimal" step="any" value="0.5" placeholder="0"><span class="suf">in. w.c.</span></span></div>
-      </div>
-    </section>
-
-    <!-- ───── Saved ───── -->
-    <section class="panel" id="p-saved" role="tabpanel" aria-labelledby="t-saved" hidden>
-      <div class="saved-top">
-        <h2>Recent results</h2><span class="grow" style="flex:1"></span>
-        <button class="btn-ghost" id="clear" type="button">Clear</button>
+    <section class="view" id="v-log" hidden>
+      <div class="log-top">
+        <div class="grow"><h2>Field log</h2><p id="log-count">Saved results and site photos</p></div>
+        <button class="btn-ghost" id="clear" type="button">Clear all</button>
       </div>
       <div id="empty" class="empty">
-        <div class="eico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-        <b>Nothing saved yet</b>
-        <span>Run a calculation and it appears here — stored on this device only.</span>
+        <div class="ico" aria-hidden="true"></div>
+        <b>Your log is empty</b>
+        <span>Open a calculator and tap <strong>Save</strong>, or <strong>Photo</strong> to attach a site picture to the result. Everything stays on this device.</span>
       </div>
-      <ul id="recents" hidden aria-live="polite"></ul>
+      <ul id="entries" hidden></ul>
     </section>
 
-    <p class="disc">FieldCalc Lite is a convenience tool. Verify design and code calculations independently. <a href="privacy.html">Privacy</a></p>
+    <p class="disc">FieldCalc is a convenience tool. Verify design and code calculations independently. <a href="privacy.html">Privacy</a></p>
   </main>
 </div>
 
-<nav class="tabs" aria-label="Calculators">
+<nav class="tabs" aria-label="Sections">
   <div class="tabs-in" role="tablist">
-    <button class="tab" id="t-area"  role="tab" aria-controls="p-area"  aria-selected="true"  data-p="p-area">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M9 3v18"/></svg><span>Area</span></button>
-    <button class="tab" id="t-slope" role="tab" aria-controls="p-slope" aria-selected="false" data-p="p-slope" tabindex="-1">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M3 20L17 6M17 6v6"/></svg><span>Slope</span></button>
-    <button class="tab" id="t-duct"  role="tab" aria-controls="p-duct"  aria-selected="false" data-p="p-duct" tabindex="-1">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8M13 9l3 3-3 3"/></svg><span>Duct</span></button>
-    <button class="tab" id="t-press" role="tab" aria-controls="p-press" aria-selected="false" data-p="p-press" tabindex="-1">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4.5-5"/></svg><span>Pressure</span></button>
-    <button class="tab" id="t-saved" role="tab" aria-controls="p-saved" aria-selected="false" data-p="p-saved" tabindex="-1">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Saved</span></button>
+    <button class="tab" id="t-home" role="tab" aria-selected="true" type="button"><span id="ti-home"></span><span>Calculators</span></button>
+    <button class="tab" id="t-log" role="tab" aria-selected="false" type="button"><span id="ti-log"></span><span>Field log</span><span class="badge" id="badge"></span></button>
   </div>
 </nav>
+
+<input type="file" id="cam" accept="image/*" capture="environment" class="sr" tabindex="-1" aria-hidden="true">
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="viewer" id="viewer" hidden role="dialog" aria-label="Photo"><img id="viewer-img" alt="Site photo"></div>
 
 <script>
 (function(){
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
+  var Cap = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins : {};
 
-  function num(id){ var v = $(id).value.trim(); return v === "" ? NaN : Number(v); }
+  /* ───────── icons ───────── */
+  function svg(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
+  var I = {
+    area:    svg('<rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M9 3v18"/>'),
+    concrete:svg('<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>'),
+    slope:   svg('<path d="M3 20h18M3 20L17 6M17 6v6"/>'),
+    stairs:  svg('<path d="M3 20h5v-4h5v-4h5V8h3"/>'),
+    duct:    svg('<circle cx="12" cy="12" r="8.5"/><path d="M8 12h8M13 9l3 3-3 3"/>'),
+    rect:    svg('<rect x="2.5" y="6" width="10" height="12" rx="1.5"/><circle cx="17.5" cy="12" r="4"/>'),
+    press:   svg('<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4.5-5"/>'),
+    pipe:    svg('<path d="M3 8h11a5 5 0 0 1 5 5v8"/><path d="M3 14h9a1 1 0 0 1 1 1v6"/>'),
+    volt:    svg('<path d="M13 3L5 13h6l-1 8 8-10h-6l1-8z"/>'),
+    length:  svg('<path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/>'),
+    grid:    svg('<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>'),
+    log:     svg('<path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3v18M10 8h5M10 12h5M10 16h3"/>'),
+    save:    svg('<path d="M6 3h12v18l-6-4-6 4z"/>'),
+    cam:     svg('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),
+    share:   svg('<path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6"/>'),
+    back:    svg('<path d="M15 5l-7 7 7 7"/>'),
+    trash:   svg('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>')
+  };
 
-  // Never render NaN or Infinity.
+  /* ───────── math helpers ───────── */
+  var N = function(x){ return typeof x === "number" && isFinite(x); };
+  var pos = function(x){ return N(x) && x >= 0; };
   function fmt(n, dp){
     if (!isFinite(n)) return "—";
     var s = n.toFixed(dp);
-    if (Math.abs(n) >= 1000){
-      var p = s.split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); s = p.join(".");
-    }
+    if (Math.abs(n) >= 1000){ var p = s.split("."); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); s = p.join("."); }
     return s;
   }
-  function setN(id, text){ var el = $(id); if (el.textContent !== text) el.textContent = text; }
-  function setSub(id, text, unit){
-    var el = $(id);
-    el.textContent = text;
-    var s = document.createElement("small"); s.textContent = unit; el.appendChild(s);
-  }
+  var NEG = "Values must be zero or greater.";
 
-  /* ───── storage ───── */
-  var KEY = "fieldcalc.recents.v1", MAX = 12, recents = [];
-  function load(){ try { var v = JSON.parse(localStorage.getItem(KEY) || "[]"); recents = Array.isArray(v) ? v.slice(0,MAX) : []; } catch(e){ recents = []; } }
-  function persist(){ try { localStorage.setItem(KEY, JSON.stringify(recents)); } catch(e){} }
-  function when(ts){
-    var m = Math.round((Date.now() - ts)/60000);
-    if (m < 1) return "just now";
-    if (m < 60) return m + "m ago";
-    var h = Math.round(m/60);
-    return h < 24 ? h + "h ago" : new Date(ts).toLocaleDateString();
-  }
-  function render(){
-    var ul = $("recents"), emp = $("empty");
-    ul.innerHTML = "";
-    if (!recents.length){ ul.hidden = true; emp.hidden = false; return; }
-    emp.hidden = true; ul.hidden = false;
-    recents.forEach(function(r){
-      var li = document.createElement("li");
-      var r1 = document.createElement("div"); r1.className = "row1";
-      var tg = document.createElement("span"); tg.className = "tag"; tg.textContent = r.tag;
-      var wn = document.createElement("span"); wn.className = "when"; wn.textContent = when(r.ts);
-      r1.appendChild(tg); r1.appendChild(wn);
-      var tx = document.createElement("div"); tx.className = "txt"; tx.textContent = r.txt;
-      li.appendChild(r1); li.appendChild(tx); ul.appendChild(li);
-    });
-  }
-  var COALESCE_MS = 60000;
-  function save(tag, txt){
-    if (!txt) return;
-    var top = recents[0];
-    if (top && top.tag === tag){
-      if (top.txt === txt) return;
-      if (Date.now() - top.ts < COALESCE_MS) recents.shift();
-    }
-    recents.unshift({ tag:tag, txt:txt, ts:Date.now() });
-    if (recents.length > MAX) recents.length = MAX;
-    persist(); render();
-  }
+  // Circular mils by conductor size.
+  var CMIL = { "14":4110, "12":6530, "10":10380, "8":16510, "6":26240, "4":41740, "3":52620, "2":66360, "1":83690,
+               "1/0":105600, "2/0":133100, "3/0":167800, "4/0":211600, "250":250000, "350":350000, "500":500000 };
+  var AWG = Object.keys(CMIL).map(function(k){ return [k, /^\d{3}$/.test(k) ? k + " kcmil" : k + " AWG"]; });
 
-  /* ───── calculators ───── */
-  function units(){ return $("u-in").checked ? "in" : "ft"; }
-
-  function areaVol(){
-    var l = num("i-l"), w = num("i-w"), h = num("i-h");
-    var inches = units() === "in", k = inches ? 1/12 : 1;
-    var suf = inches ? "in" : "ft";
-    $("s-l").textContent = suf; $("s-w").textContent = suf; $("s-h").textContent = suf;
-
-    var neg = [l,w,h].some(function(v){ return isFinite(v) && v < 0; });
-    $("n-area").textContent = neg ? "Negative dimensions are not valid." : "";
-
-    var ok = isFinite(l) && isFinite(w) && l >= 0 && w >= 0;
-    var area = ok ? (l*k)*(w*k) : NaN;
-    var okv = ok && isFinite(h) && h >= 0;
-    var vol = okv ? area*(h*k) : NaN;
-
-    setN("o-area", fmt(area,2));
-    setSub("o-vol", fmt(vol,2), "ft³");
-    if (!ok) return "";
-    return l + "×" + w + (okv ? "×" + h : "") + " " + suf + " → " + fmt(area,2) + " ft²" +
-           (okv ? " · " + fmt(vol,2) + " ft³" : "");
-  }
-
-  function slope(){
-    var rise = num("i-rise"), run = num("i-run"), note = $("n-slope");
-    if (!isFinite(rise) || !isFinite(run)){
-      note.textContent = ""; setN("o-grade","—"); setSub("o-ang","—","deg"); return "";
-    }
-    if (run === 0 && rise === 0){
-      note.textContent = "Enter a rise and a run."; setN("o-grade","—"); setSub("o-ang","—","deg"); return "";
-    }
-    var ang = Math.atan2(rise, run) * 180 / Math.PI;
-    if (run === 0){
-      note.textContent = "Run is zero — vertical. Grade is undefined.";
-      setN("o-grade","—"); setSub("o-ang", fmt(ang,2), "deg");
-      return "rise " + rise + " / run 0 → vertical, " + fmt(ang,2) + "°";
-    }
-    note.textContent = run < 0 ? "Negative run — check your measurement." : "";
-    var g = rise/run*100;
-    setN("o-grade", fmt(g,2)); setSub("o-ang", fmt(ang,2), "deg");
-    return "rise " + rise + " / run " + run + " → " + fmt(g,2) + "% · " + fmt(ang,2) + "°";
-  }
-
-  function duct(){
-    var d = num("i-dia"), v = num("i-vel");
-    $("n-duct").textContent = ((isFinite(d)&&d<0)||(isFinite(v)&&v<0)) ? "Diameter and velocity must be zero or greater." : "";
-    var okd = isFinite(d) && d >= 0;
-    var ft = okd ? d/12 : NaN;
-    var a = okd ? Math.PI*ft*ft/4 : NaN;
-    var ok = okd && isFinite(v) && v >= 0;
-    var cfm = ok ? v*a : NaN;
-    setN("o-cfm", fmt(cfm,1)); setSub("o-darea", fmt(a,4), "ft²");
-    return ok ? (d + "″ dia @ " + v + " FPM → " + fmt(cfm,1) + " CFM") : "";
-  }
-
-  function pressure(){
-    var wc = num("i-wc");
-    $("n-press").textContent = "";
-    if (!isFinite(wc)){ setN("o-pa","—"); setSub("o-psi","—","psi"); return ""; }
-    var pa = wc*249.0889, psi = wc*0.0360912;
-    setN("o-pa", fmt(pa,2)); setSub("o-psi", fmt(psi,5), "psi");
-    return wc + " in. w.c. → " + fmt(pa,2) + " Pa · " + fmt(psi,5) + " psi";
-  }
-
-  var CALCS = [
-    { tag:"Area",     ids:["i-l","i-w","i-h","u-ft","u-in"], run:areaVol },
-    { tag:"Slope",    ids:["i-rise","i-run"],                run:slope },
-    { tag:"Duct",     ids:["i-dia","i-vel"],                 run:duct },
-    { tag:"Pressure", ids:["i-wc"],                          run:pressure }
+  /* ───────── calculators ─────────
+     Each compute() returns formatted strings: p (primary), s (secondary),
+     note, and sum (a one-line summary; "" when inputs are incomplete). */
+  var GROUPS = [
+    ["Building",   ["area","concrete","slope","stairs"]],
+    ["Mechanical", ["duct","rect","press","pipe"]],
+    ["Electrical & units", ["volt","length"]]
   ];
+  var C = {
+    area: { name:"Area & Volume", tag:"Area", sub:"Rectangular footprint", pl:"Area", pu:"ft²", sl:"Volume", su:"ft³",
+      fields:[ {k:"l",label:"Length",val:10,suf:"u"}, {k:"w",label:"Width",val:8,suf:"u"},
+               {k:"h",label:"Height / depth",val:9,suf:"u"}, {k:"u",label:"Units",seg:[["ft","Feet"],["in","Inches"]],val:"ft"} ],
+      compute:function(v){
+        var k = v.u === "in" ? 1/12 : 1;
+        var bad = [v.l,v.w,v.h].some(function(x){ return N(x) && x < 0; });
+        var ok = pos(v.l) && pos(v.w), area = ok ? v.l*k*v.w*k : NaN;
+        var okv = ok && pos(v.h), vol = okv ? area*v.h*k : NaN;
+        return { p:fmt(area,2), s:fmt(vol,2), note:bad ? NEG : "",
+          sum: ok ? v.l + "×" + v.w + (okv ? "×" + v.h : "") + " " + v.u + " → " + fmt(area,2) + " ft²" + (okv ? " · " + fmt(vol,2) + " ft³" : "") : "" };
+      } },
 
-  // Mobile keyboards commonly dismiss without blurring the field, so "change" may
-  // never fire on a phone. Debounce a save off typing too, or a result the user
-  // read on screen would never reach the list.
-  var SAVE_IDLE_MS = 800, timers = {};
-  CALCS.forEach(function(c){
-    c.ids.forEach(function(id){
-      var el = $(id);
-      el.addEventListener("input", function(){
-        c.run();
-        clearTimeout(timers[c.tag]);
-        timers[c.tag] = setTimeout(function(){ save(c.tag, c.run()); }, SAVE_IDLE_MS);
-      });
-      el.addEventListener("change", function(){
-        clearTimeout(timers[c.tag]); save(c.tag, c.run());
-      });
-    });
-  });
+    concrete: { name:"Concrete", tag:"Concrete", sub:"Slab or footing volume", pl:"Concrete", pu:"yd³", sl:"80-lb bags", su:"bags",
+      fields:[ {k:"l",label:"Length",suf:"ft",val:10}, {k:"w",label:"Width",suf:"ft",val:10},
+               {k:"t",label:"Thickness",suf:"in",val:4}, {k:"x",label:"Waste",suf:"%",val:10} ],
+      compute:function(v){
+        var bad = [v.l,v.w,v.t,v.x].some(function(x){ return N(x) && x < 0; });
+        var ok = pos(v.l) && pos(v.w) && pos(v.t);
+        var waste = pos(v.x) ? v.x : 0;
+        var ft3 = ok ? v.l*v.w*(v.t/12)*(1 + waste/100) : NaN;
+        var bags = ok ? Math.ceil(ft3/0.6) : NaN;            // an 80-lb bag yields about 0.6 ft³
+        return { p:fmt(ft3/27,2), s:fmt(bags,0), note:bad ? NEG : "",
+          sum: ok ? v.l + "×" + v.w + " ft × " + v.t + "″ +" + waste + "% → " + fmt(ft3/27,2) + " yd³ · " + fmt(bags,0) + " bags" : "" };
+      } },
 
-  $("clear").addEventListener("click", function(){
-    recents = [];
-    try { localStorage.removeItem(KEY); } catch(e){}
-    render();
-  });
+    slope: { name:"Slope", tag:"Slope", sub:"Rise over run — same unit for both", pl:"Grade", pu:"%", sl:"Angle", su:"deg",
+      fields:[ {k:"r",label:"Rise",val:1}, {k:"n",label:"Run",val:48} ],
+      compute:function(v){
+        if (!N(v.r) || !N(v.n)) return { p:"—", s:"—", note:"", sum:"" };
+        if (v.r === 0 && v.n === 0) return { p:"—", s:"—", note:"Enter a rise and a run.", sum:"" };
+        var ang = Math.atan2(v.r, v.n) * 180 / Math.PI;
+        if (v.n === 0) return { p:"—", s:fmt(ang,2), note:"Run is zero — vertical. Grade is undefined.",
+          sum:"rise " + v.r + " / run 0 → vertical, " + fmt(ang,2) + "°" };
+        var g = v.r / v.n * 100;
+        return { p:fmt(g,2), s:fmt(ang,2), note: v.n < 0 ? "Negative run — check your measurement." : "",
+          sum:"rise " + v.r + " / run " + v.n + " → " + fmt(g,2) + "% · " + fmt(ang,2) + "°" };
+      } },
 
-  /* ───── tabs ───── */
-  var tabs = [].slice.call(document.querySelectorAll(".tab"));
-  function show(tab){
-    tabs.forEach(function(t){
-      var on = t === tab;
-      t.setAttribute("aria-selected", on ? "true" : "false");
-      t.tabIndex = on ? 0 : -1;
-      $(t.dataset.p).hidden = !on;
-    });
-    window.scrollTo({ top:0, behavior:"instant" in document.documentElement.style ? "instant" : "auto" });
+    stairs: { name:"Stairs", tag:"Stairs", sub:"Riser count and height", pl:"Risers", pu:"risers", sl:"Riser height", su:"in",
+      fields:[ {k:"r",label:"Total rise",suf:"in",val:108}, {k:"m",label:"Max riser",suf:"in",val:7.75} ],
+      compute:function(v){
+        var bad = (N(v.r) && v.r < 0) || (N(v.m) && v.m < 0);
+        var ok = N(v.r) && N(v.m) && v.r > 0 && v.m > 0;
+        var n = ok ? Math.ceil(v.r / v.m) : NaN, h = ok ? v.r / n : NaN;
+        return { p:fmt(n,0), s:fmt(h,2), note:bad ? NEG : "",
+          sum: ok ? v.r + "″ rise → " + n + " risers @ " + fmt(h,2) + "″ (" + (n - 1) + " treads)" : "" };
+      } },
+
+    duct: { name:"Round Duct Airflow", tag:"Duct", sub:"CFM from diameter and velocity", pl:"Airflow", pu:"CFM", sl:"Duct area", su:"ft²",
+      fields:[ {k:"d",label:"Diameter",suf:"in",val:10}, {k:"v",label:"Velocity",suf:"FPM",val:900} ],
+      compute:function(v){
+        var bad = (N(v.d) && v.d < 0) || (N(v.v) && v.v < 0);
+        var a = pos(v.d) ? Math.PI * Math.pow(v.d/12, 2) / 4 : NaN;
+        var ok = pos(v.d) && pos(v.v), cfm = ok ? v.v * a : NaN;
+        return { p:fmt(cfm,1), s:fmt(a,4), note:bad ? NEG : "",
+          sum: ok ? v.d + "″ dia @ " + v.v + " FPM → " + fmt(cfm,1) + " CFM" : "" };
+      } },
+
+    rect: { name:"Rect → Round Duct", tag:"Rect→Round", sub:"Equivalent diameter", pl:"Equivalent", pu:"in Ø", sl:"Aspect ratio", su:": 1",
+      fields:[ {k:"a",label:"Width",suf:"in",val:12}, {k:"b",label:"Height",suf:"in",val:8} ],
+      compute:function(v){
+        var bad = (N(v.a) && v.a < 0) || (N(v.b) && v.b < 0);
+        var ok = N(v.a) && N(v.b) && v.a > 0 && v.b > 0;
+        // Huebscher equal-friction equivalent diameter
+        var de = ok ? 1.30 * Math.pow(v.a * v.b, 0.625) / Math.pow(v.a + v.b, 0.25) : NaN;
+        var ar = ok ? Math.max(v.a, v.b) / Math.min(v.a, v.b) : NaN;
+        return { p:fmt(de,1), s:fmt(ar,2), note:bad ? NEG : "",
+          sum: ok ? v.a + "×" + v.b + "″ rect → " + fmt(de,1) + "″ round equivalent" : "" };
+      } },
+
+    press: { name:"Pressure Conversion", tag:"Pressure", sub:"Water column to Pa and psi", pl:"Pascals", pu:"Pa", sl:"PSI", su:"psi",
+      fields:[ {k:"w",label:"Inches water column",suf:"in. w.c.",val:0.5} ],
+      compute:function(v){
+        if (!N(v.w)) return { p:"—", s:"—", note:"", sum:"" };
+        var pa = v.w * 249.0889, psi = v.w * 0.0360912;
+        return { p:fmt(pa,2), s:fmt(psi,5), note:"", sum: v.w + " in. w.c. → " + fmt(pa,2) + " Pa · " + fmt(psi,5) + " psi" };
+      } },
+
+    pipe: { name:"Pipe Volume", tag:"Pipe", sub:"Water held in a pipe run", pl:"Volume", pu:"gal", sl:"Water weight", su:"lb",
+      fields:[ {k:"d",label:"Inside diameter",suf:"in",val:2}, {k:"l",label:"Length",suf:"ft",val:100} ],
+      compute:function(v){
+        var bad = (N(v.d) && v.d < 0) || (N(v.l) && v.l < 0);
+        var ok = pos(v.d) && pos(v.l);
+        var gal = ok ? Math.PI * Math.pow(v.d/12, 2) / 4 * v.l * 7.48052 : NaN;
+        return { p:fmt(gal,2), s:fmt(gal * 8.34,1), note:bad ? NEG : "",
+          sum: ok ? v.d + "″ ID × " + v.l + " ft → " + fmt(gal,2) + " gal · " + fmt(gal*8.34,1) + " lb" : "" };
+      } },
+
+    volt: { name:"Voltage Drop", tag:"V-Drop", sub:"Copper or aluminum conductors", pl:"Drop", pu:"V", sl:"Percent of supply", su:"%",
+      fields:[ {k:"ph",label:"Phase",seg:[["1","Single"],["3","Three"]],val:"1"},
+               {k:"m",label:"Conductor",seg:[["cu","Copper"],["al","Alum."]],val:"cu"},
+               {k:"g",label:"Wire size",sel:AWG,val:"12"},
+               {k:"sv",label:"Supply",suf:"V",val:120},
+               {k:"i",label:"Load",suf:"A",val:16},
+               {k:"l",label:"One-way length",suf:"ft",val:100} ],
+      compute:function(v){
+        var bad = [v.sv,v.i,v.l].some(function(x){ return N(x) && x < 0; });
+        var K = v.m === "al" ? 21.2 : 12.9;                  // ohm·cmil/ft, approx. at 75 °C
+        var ok = pos(v.i) && pos(v.l) && N(v.sv) && v.sv > 0 && CMIL[v.g];
+        var vd = ok ? (v.ph === "3" ? Math.sqrt(3) : 2) * K * v.i * v.l / CMIL[v.g] : NaN;
+        return { p:fmt(vd,2), s:fmt(vd / v.sv * 100,2), note:bad ? NEG : "",
+          sum: ok ? v.g + (/^\d{3}$/.test(v.g) ? " kcmil " : " AWG ") + (v.m === "al" ? "Al" : "Cu") + ", " + v.ph + "Φ " + v.sv + "V, " +
+                    v.i + "A × " + v.l + " ft → " + fmt(vd,2) + " V (" + fmt(vd / v.sv * 100,2) + "%)" : "" };
+      } },
+
+    length: { name:"Feet-Inches → Metric", tag:"Length", sub:"Imperial to metric", pl:"Millimeters", pu:"mm", sl:"Meters", su:"m",
+      fields:[ {k:"f",label:"Feet",suf:"ft",val:10}, {k:"n",label:"Inches",suf:"in",val:6} ],
+      compute:function(v){
+        if (!N(v.f) && !N(v.n)) return { p:"—", s:"—", note:"", sum:"" };
+        var inch = (N(v.f) ? v.f : 0) * 12 + (N(v.n) ? v.n : 0), mm = inch * 25.4;
+        return { p:fmt(mm,1), s:fmt(mm/1000,3), note:"",
+          sum: (N(v.f) ? v.f : 0) + "′ " + (N(v.n) ? v.n : 0) + "″ → " + fmt(mm,1) + " mm · " + fmt(mm/1000,3) + " m" };
+      } }
+  };
+
+  /* ───────── persistence ───────── */
+  function load(key, dflt){ try { var v = JSON.parse(localStorage.getItem(key)); return v == null ? dflt : v; } catch(e){ return dflt; } }
+  function store(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e){ return false; } }
+  var INPUTS = "fieldcalc.inputs.v1", LOG = "fieldcalc.log.v1", MAX = 100;
+  var inputs = load(INPUTS, {});
+  var log = load(LOG, null);
+  if (!Array.isArray(log)){
+    // Carry over results saved by v0.x.
+    var old = load("fieldcalc.recents.v1", []);
+    log = (Array.isArray(old) ? old : []).map(function(r){ return { id:"m" + r.ts, tag:r.tag, txt:r.txt, ts:r.ts, photo:false }; });
+    store(LOG, log);
   }
-  tabs.forEach(function(t, i){
-    t.addEventListener("click", function(){ show(t); });
-    t.addEventListener("keydown", function(e){
-      var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-      if (!d) return;
-      e.preventDefault();
-      var n = tabs[(i + d + tabs.length) % tabs.length];
-      n.focus(); show(n);
+  try { localStorage.removeItem("fieldcalc.recents.v1"); } catch(e){}
+
+  // Photos are too big for localStorage's ~5 MB, so they live in IndexedDB keyed by entry id.
+  var photos = (function(){
+    var dbp;
+    function db(){
+      return dbp || (dbp = new Promise(function(res, rej){
+        if (!window.indexedDB) return rej(new Error("no indexedDB"));
+        var r = indexedDB.open("fieldcalc", 1);
+        r.onupgradeneeded = function(){ r.result.createObjectStore("photos"); };
+        r.onsuccess = function(){ res(r.result); };
+        r.onerror = function(){ rej(r.error); };
+      }));
+    }
+    function run(mode, fn){
+      return db().then(function(d){ return new Promise(function(res, rej){
+        var t = d.transaction("photos", mode), req = fn(t.objectStore("photos"));
+        t.oncomplete = function(){ res(req ? req.result : undefined); };
+        t.onerror = t.onabort = function(){ rej(t.error); };
+      }); });
+    }
+    return {
+      put:function(k, v){ return run("readwrite", function(s){ return s.put(v, k); }); },
+      get:function(k){ return run("readonly", function(s){ return s.get(k); }); },
+      del:function(k){ return run("readwrite", function(s){ return s.delete(k); }).catch(function(){}); },
+      clear:function(){ return run("readwrite", function(s){ return s.clear(); }).catch(function(){}); }
+    };
+  })();
+
+  /* ───────── native niceties (no-ops on the web) ───────── */
+  function tick(){
+    if (Cap.Haptics) Cap.Haptics.impact({ style:"LIGHT" }).catch(function(){});
+    else if (navigator.vibrate) navigator.vibrate(8);
+  }
+  function share(text){
+    if (Cap.Share) return Cap.Share.share({ title:"FieldCalc", text:text, dialogTitle:"Share result" }).catch(function(){});
+    if (navigator.share) return navigator.share({ title:"FieldCalc", text:text }).catch(function(){});
+    var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("Copied to clipboard"); } catch(e){ toast("Couldn't share"); }
+    ta.remove();
+  }
+  var toastTimer;
+  function toast(msg){
+    var t = $("toast"); t.textContent = msg; t.classList.add("on");
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove("on"); }, 1800);
+  }
+
+  /* ───────── home ───────── */
+  (function buildHome(){
+    var html = "";
+    GROUPS.forEach(function(g){
+      html += '<h2 class="cat">' + g[0] + '</h2><div class="tiles">';
+      g[1].forEach(function(id){
+        var c = C[id];
+        html += '<button class="tile" type="button" data-c="' + id + '"><span class="ico">' + I[id] + '</span>' +
+                '<span class="t">' + c.name + '</span><span class="d">' + c.sub + '</span></button>';
+      });
+      html += '</div>';
     });
+    $("home-cats").innerHTML = html;
+    $("home-cats").addEventListener("click", function(e){
+      var b = e.target.closest(".tile"); if (b) openCalc(b.dataset.c);
+    });
+  })();
+  $("ti-home").outerHTML = I.grid; $("ti-log").outerHTML = I.log;
+  document.querySelector("#empty .ico").innerHTML = I.log;
+
+  /* ───────── calculator view ───────── */
+  var cur = null;   // { id, c, sum }
+  function renderCalc(id){
+    var c = C[id], saved = inputs[id] || {}, v = $("v-calc");
+    var f = c.fields.map(function(fd){
+      var val = saved[fd.k] != null ? saved[fd.k] : fd.val;
+      if (fd.seg){
+        return '<div class="fld"><span class="lbl" id="l-' + fd.k + '">' + fd.label + '</span><div class="seg" role="radiogroup" aria-labelledby="l-' + fd.k + '">' +
+          fd.seg.map(function(o){
+            var oid = "f-" + fd.k + "-" + o[0];
+            return '<input type="radio" name="f-' + fd.k + '" id="' + oid + '" value="' + o[0] + '"' + (String(val) === o[0] ? " checked" : "") +
+                   '><label for="' + oid + '">' + o[1] + '</label>';
+          }).join("") + '</div></div>';
+      }
+      if (fd.sel){
+        return '<div class="fld"><label for="f-' + fd.k + '">' + fd.label + '</label><span class="box"><select id="f-' + fd.k + '">' +
+          fd.sel.map(function(o){ return '<option value="' + o[0] + '"' + (String(val) === o[0] ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") +
+          '</select></span></div>';
+      }
+      return '<div class="fld"><label for="f-' + fd.k + '">' + fd.label + '</label><span class="box">' +
+        '<input id="f-' + fd.k + '" type="number" inputmode="decimal" step="any" placeholder="0" value="' + (val === "" ? "" : val) + '">' +
+        (fd.suf ? '<span class="suf" id="s-' + fd.k + '"></span>' : "") + '</span></div>';
+    }).join("");
+
+    v.innerHTML =
+      '<div class="calc-top"><button class="back" id="back" type="button" aria-label="All calculators">' + I.back + '</button>' +
+        '<span class="ico">' + I[id] + '</span><div><h2>' + c.name + '</h2><p>' + c.sub + '</p></div></div>' +
+      '<div class="readout"><div class="rlabel">' + c.pl + '</div>' +
+        '<div class="rvalue"><span class="n" id="o-p">—</span><span class="u">' + c.pu + '</span></div>' +
+        '<div class="rsub"><span class="k">' + c.sl + '</span><span class="grow"></span><span class="v" id="o-s">—</span></div></div>' +
+      '<p class="note" id="o-note" role="status"></p>' +
+      '<div class="fields' + (c.fields.length === 1 ? " one" : "") + '">' + f + '</div>' +
+      '<div class="actions">' +
+        '<button class="act primary" id="a-save" type="button">' + I.save + 'Save</button>' +
+        '<button class="act" id="a-photo" type="button">' + I.cam + 'Photo</button>' +
+        '<button class="act" id="a-share" type="button">' + I.share + 'Share</button>' +
+      '</div>';
+
+    cur = { id:id, c:c, sum:"" };
+    v.addEventListener("input", update);
+    v.addEventListener("change", update);
+    $("back").addEventListener("click", goHome);
+    $("a-save").addEventListener("click", function(){
+      if (!cur.sum) return;
+      addEntry(cur.c.tag, cur.sum, null).then(function(){ tick(); toast("Saved to field log"); });
+    });
+    $("a-photo").addEventListener("click", function(){ if (cur.sum) $("cam").click(); });
+    $("a-share").addEventListener("click", function(){ if (cur.sum){ tick(); share(cur.c.name + ": " + cur.sum); } });
+    update();
+  }
+
+  function readVals(c){
+    var v = {};
+    c.fields.forEach(function(fd){
+      if (fd.seg){ var on = document.querySelector('input[name="f-' + fd.k + '"]:checked'); v[fd.k] = on ? on.value : fd.val; }
+      else if (fd.sel){ v[fd.k] = $("f-" + fd.k).value; }
+      else { var raw = $("f-" + fd.k).value.trim(); v[fd.k] = raw === "" ? NaN : Number(raw); }
+    });
+    return v;
+  }
+
+  function update(){
+    if (!cur) return;
+    var c = cur.c, v = readVals(c), r = c.compute(v);
+    $("o-p").textContent = r.p;
+    var s = $("o-s"); s.textContent = r.s;
+    var sm = document.createElement("small"); sm.textContent = c.su; s.appendChild(sm);
+    $("o-note").textContent = r.note || "";
+    c.fields.forEach(function(fd){ if (fd.suf) $("s-" + fd.k).textContent = fd.suf === "u" ? v.u : fd.suf; });
+    cur.sum = r.sum;
+    ["a-save","a-photo","a-share"].forEach(function(b){ $(b).disabled = !r.sum; });
+    var keep = {};
+    c.fields.forEach(function(fd){ var x = v[fd.k]; keep[fd.k] = (typeof x === "number" && !isFinite(x)) ? "" : x; });
+    inputs[cur.id] = keep; store(INPUTS, inputs);
+  }
+
+  /* ───────── photos ───────── */
+  function shrink(file){
+    return new Promise(function(res, rej){
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function(){
+        var max = 1280, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+        var cv = document.createElement("canvas"); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        res(cv.toDataURL("image/jpeg", 0.72));
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error("decode")); };
+      img.src = url;
+    });
+  }
+  $("cam").addEventListener("change", function(){
+    var file = this.files && this.files[0], snap = cur && cur.sum ? { tag:cur.c.tag, sum:cur.sum } : null;
+    this.value = "";
+    if (!file || !snap) return;
+    shrink(file)
+      .then(function(data){ return addEntry(snap.tag, snap.sum, data); })
+      .then(function(ok){ tick(); toast(ok ? "Photo saved to field log" : "Saved — photo couldn't be stored"); })
+      .catch(function(){ toast("Couldn't read that photo"); });
   });
 
-  load(); render();
-  CALCS.forEach(function(c){ c.run(); });
+  /* ───────── field log ───────── */
+  function addEntry(tag, txt, photo){
+    var e = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), tag:tag, txt:txt, ts:Date.now(), photo:false };
+    var stored = photo ? photos.put(e.id, photo).then(function(){ return true; }, function(){ return false; }) : Promise.resolve(true);
+    return stored.then(function(ok){
+      e.photo = !!photo && ok;
+      log.unshift(e);
+      log.splice(MAX).forEach(function(d){ if (d.photo) photos.del(d.id); });
+      store(LOG, log); renderLog();
+      return ok;
+    });
+  }
+  function when(ts){
+    var m = Math.round((Date.now() - ts) / 60000);
+    if (m < 1) return "just now"; if (m < 60) return m + "m ago";
+    var h = Math.round(m / 60); if (h < 24) return h + "h ago";
+    return new Date(ts).toLocaleDateString();
+  }
+  function renderLog(){
+    var ul = $("entries");
+    ul.innerHTML = "";
+    $("badge").textContent = log.length ? (log.length > 99 ? "99+" : String(log.length)) : "";
+    $("empty").hidden = log.length > 0; ul.hidden = !log.length; $("clear").hidden = !log.length;
+    var n = log.length, ph = log.filter(function(e){ return e.photo; }).length;
+    $("log-count").textContent = n ? n + " saved" + (ph ? " · " + ph + " with photos" : "") : "Saved results and site photos";
+    log.forEach(function(e){
+      var li = document.createElement("li"); li.className = "entry";
+      if (e.photo){
+        var tb = document.createElement("button"); tb.className = "thumb"; tb.type = "button"; tb.setAttribute("aria-label", "View photo");
+        var im = document.createElement("img"); im.alt = ""; tb.appendChild(im); li.appendChild(tb);
+        photos.get(e.id).then(function(src){ if (src) im.src = src; else tb.remove(); }, function(){ tb.remove(); });
+        tb.addEventListener("click", function(){ if (im.src){ $("viewer-img").src = im.src; $("viewer").hidden = false; } });
+      }
+      var b = document.createElement("div"); b.className = "ebody";
+      b.innerHTML = '<div class="row1"><span class="tag"></span><span class="when"></span></div><div class="etxt"></div>' +
+        '<div class="ops"><button class="op" type="button" data-a="share">' + I.share + 'Share</button>' +
+        '<button class="op" type="button" data-a="del">' + I.trash + 'Delete</button></div>';
+      b.querySelector(".tag").textContent = e.tag;
+      b.querySelector(".when").textContent = when(e.ts);
+      b.querySelector(".etxt").textContent = e.txt;
+      b.querySelector('[data-a="share"]').addEventListener("click", function(){ tick(); share(e.tag + ": " + e.txt); });
+      b.querySelector('[data-a="del"]').addEventListener("click", function(){
+        log = log.filter(function(x){ return x.id !== e.id; });
+        if (e.photo) photos.del(e.id);
+        store(LOG, log); renderLog(); tick(); toast("Deleted");
+      });
+      li.appendChild(b); ul.appendChild(li);
+    });
+  }
+  $("clear").addEventListener("click", function(){
+    if (!log.length || !confirm("Delete all " + log.length + " entries and their photos? This can't be undone.")) return;
+    log = []; store(LOG, log); photos.clear(); renderLog(); tick();
+  });
+  $("viewer").addEventListener("click", function(){ this.hidden = true; $("viewer-img").removeAttribute("src"); });
 
-  /* ───── install prompt ───── */
+  /* ───────── routing ─────────
+     Hash routes give Android's back button something sensible to do. */
+  var pushed = false;
+  function openCalc(id){ pushed = true; location.hash = "#/c/" + id; }
+  function goHome(){ if (pushed){ pushed = false; history.back(); } else location.replace("#/"); }
+  function show(view){
+    ["v-home","v-calc","v-log"].forEach(function(x){ $(x).hidden = x !== view; });
+    $("t-home").setAttribute("aria-selected", view !== "v-log" ? "true" : "false");
+    $("t-log").setAttribute("aria-selected", view === "v-log" ? "true" : "false");
+    window.scrollTo(0, 0);
+  }
+  function route(){
+    var h = location.hash.replace(/^#\/?/, "");
+    if (h === "log"){ cur = null; show("v-log"); return; }
+    var m = /^c\/(\w+)$/.exec(h);
+    if (m && C[m[1]]){ renderCalc(m[1]); show("v-calc"); return; }
+    cur = null; show("v-home");
+  }
+  window.addEventListener("hashchange", route);
+  $("t-home").addEventListener("click", function(){ pushed = false; location.replace("#/"); });
+  $("t-log").addEventListener("click", function(){ pushed = false; location.replace("#/log"); });
+  $("home-btn").addEventListener("click", function(){ pushed = false; location.replace("#/"); });
+
+  // Hide the tab bar while typing so it doesn't ride up on the keyboard.
+  document.addEventListener("focusin", function(e){ if (e.target.matches && e.target.matches("input[type=number]")) document.body.classList.add("typing"); });
+  document.addEventListener("focusout", function(){
+    setTimeout(function(){ var a = document.activeElement; if (!a || !a.matches || !a.matches("input[type=number]")) document.body.classList.remove("typing"); }, 60);
+  });
+
+  renderLog(); route();
+
+  /* ───────── install prompt ───────── */
   var deferred = null, btn = $("install");
-  window.addEventListener("beforeinstallprompt", function(e){
-    e.preventDefault(); deferred = e; btn.style.display = "inline-block";
-  });
+  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferred = e; btn.style.display = "inline-block"; });
   btn.addEventListener("click", function(){
-    if (!deferred) return;
-    deferred.prompt();
+    if (!deferred) return; deferred.prompt();
     deferred.userChoice.finally(function(){ deferred = null; btn.style.display = "none"; });
   });
   window.addEventListener("appinstalled", function(){ deferred = null; btn.style.display = "none"; });
 
-  /* ───── offline (skipped under Capacitor: files are already local there) ───── */
+  /* ───────── offline (skipped under Capacitor: files are already local there) ───────── */
   if ("serviceWorker" in navigator && !window.Capacitor){
-    window.addEventListener("load", function(){
-      navigator.serviceWorker.register("sw.js").catch(function(){});
-    });
+    window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
   }
+
+  window.__fc = { C:C, fmt:fmt };   // exposed for the self-test
 })();
 </script>
 </body>

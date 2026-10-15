@@ -1,7 +1,7 @@
 {
-  "name": "FieldCalc Lite",
+  "name": "FieldCalc",
   "short_name": "FieldCalc",
-  "description": "Fast field calculations for construction, MEP, and site work. Values stay on this device.",
+  "description": "Ten fast field calculators for construction, MEP, and site work, with a photo field log. Values stay on this device.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

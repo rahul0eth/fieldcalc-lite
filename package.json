@@ -1,6 +1,6 @@
 {
   "name": "fieldcalc-lite",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Fast field calculations for construction, MEP, and site work.",
   "scripts": {
     "start": "python3 -m http.server 4178 --directory dist",
@@ -18,7 +18,10 @@
   "dependencies": {
     "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.5.3",
-    "@capacitor/ios": "^8.5.3"
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/keyboard": "^8.0.6",
+    "@capacitor/share": "^8.0.3"
   },
   "private": true
 }
